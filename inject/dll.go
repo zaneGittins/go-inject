@@ -11,6 +11,7 @@ var (
 
 	// NTDLL
 	rtlCopyMemory = ntdll.NewProc("RtlCopyMemory")
+	rtlMoveMemory = ntdll.NewProc("RtlMoveMemory")
 
 	// KERNEL32
 	createThread        = kernel32.NewProc("CreateThread")
@@ -25,6 +26,8 @@ var (
 	closeHandle         = kernel32.NewProc("CloseHandle")
 	isWow64Process      = kernel32.NewProc("IsWow64Process")
 	waitForSingleObject = kernel32.NewProc("WaitForSingleObject")
+	getProcAddress      = kernel32.NewProc("GetProcAddress")
+	getModuleHandleA    = kernel32.NewProc("GetModuleHandleA")
 
 	// PSAPI
 	enumProcesses = psapi.NewProc("EnumProcesses")

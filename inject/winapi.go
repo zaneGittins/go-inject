@@ -12,6 +12,13 @@ func RtlCopyMemory(destination uintptr, source []byte) {
 	return
 }
 
+func RtlMoveMemory(source uintptr, length int) int {
+
+	var destination int
+	rtlMoveMemory.Call((uintptr)(unsafe.Pointer(&destination)), source, uintptr(length))
+	return destination
+}
+
 func CreateThread(startAddress uintptr) uintptr {
 
 	thread, _, _ := createThread.Call(0, 0, startAddress, uintptr(0), 0, 0)
@@ -92,4 +99,16 @@ func WaitForSingleObject(thread uintptr, milliseconds uint32) {
 
 	waitForSingleObject.Call(uintptr(windows.Handle(thread)), uintptr(milliseconds))
 	return
+}
+
+func GetProcAddress(module uintptr, procName string) uintptr {
+
+	address, _, _ := getProcAddress.Call(module, uintptr(unsafe.Pointer(StringToCharPtr(procName))))
+	return address
+}
+
+func GetModuleHandleA(moduleName string) uintptr {
+
+	handle, _, _ := getModuleHandleA.Call(uintptr(unsafe.Pointer(StringToCharPtr(moduleName))))
+	return handle
 }

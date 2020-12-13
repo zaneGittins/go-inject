@@ -33,7 +33,11 @@ env GOOS=windows GOARCH=amd64 go build
 
 ## References
 
+* https://medium.com/@justen.walker/breaking-all-the-rules-using-go-to-call-windows-api-2cbfd8c79724
 * https://labs.jumpsec.com/2019/06/20/bypassing-antivirus-with-golang-gopher-it/
 * https://github.com/brimstone/go-shellcode
 * https://github.com/sysdream/hershell
 * https://github.com/yoda66/MalwareDevTalk
+* https://posts.specterops.io/adventures-in-dynamic-evasion-1fe0bac57aa
+* https://github.com/Adepts-Of-0xCC/VBA-macro-experiments/blob/main/EDRHookDetector.vba
+ 

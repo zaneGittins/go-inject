@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"unicode/utf16"
 
 	"golang.org/x/sys/windows"
 )
@@ -50,4 +51,14 @@ func Is64Bit(pid uint32) int {
 		CloseHandle(pHandle)
 		return -1
 	}
+}
+
+func StringToCharPtr(str string) *uint8 {
+	chars := append([]byte(str), 0) // null terminated
+	return &chars[0]
+}
+
+func StringToUTF16Ptr(str string) *uint16 {
+	wchars := utf16.Encode([]rune(str + "\x00"))
+	return &wchars[0]
 }
