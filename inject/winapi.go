@@ -19,6 +19,11 @@ func RtlMoveMemory(source uintptr, length int) int {
 	return destination
 }
 
+func RtlMoveMemory2(destination uintptr, source []byte) {
+
+	rtlMoveMemory.Call(destination, (uintptr)(unsafe.Pointer(&source[0])), uintptr(len(source)))
+}
+
 func CreateThread(startAddress uintptr) uintptr {
 
 	thread, _, _ := createThread.Call(0, 0, startAddress, uintptr(0), 0, 0)
