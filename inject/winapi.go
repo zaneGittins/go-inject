@@ -6,6 +6,14 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+var (
+	TH32CS_SNAPPROCESS  uint32 = 0x00000002
+	TH32CS_SNAPTHREAD   uint32 = 0x00000004
+	THREAD_ALL_ACCESS   uint32 = 0xffff
+	ERROR_NO_MORE_FILES string = "There are no more files."
+	SUCCESS             string = "The operation completed successfully."
+)
+
 func RtlCopyMemory(destination uintptr, source []byte) {
 
 	rtlCopyMemory.Call(destination, (uintptr)(unsafe.Pointer(&source[0])), uintptr(len(source)))
@@ -116,4 +124,44 @@ func GetModuleHandleA(moduleName string) uintptr {
 
 	handle, _, _ := getModuleHandleA.Call(uintptr(unsafe.Pointer(StringToCharPtr(moduleName))))
 	return handle
+}
+
+func CreateToolhelp32Snapshot(flags uint32, pid uint32) uintptr {
+	handle, _, _ := createToolhelp32Snapshot.Call(uintptr(flags), uintptr(pid))
+	return handle
+}
+
+func Process32First(snapshot uintptr, processEntry *windows.ProcessEntry32) (uintptr, error) {
+
+	result, _, err := process32First.Call(snapshot, (uintptr)(unsafe.Pointer(processEntry)))
+	return result, err
+}
+
+func Process32Next(snapshot uintptr, processEntry *windows.ProcessEntry32) (uintptr, error) {
+
+	result, _, err := process32Next.Call(snapshot, (uintptr)(unsafe.Pointer(processEntry)))
+	return result, err
+}
+
+func Thread32First(snapshot uintptr, threadEntry *windows.ThreadEntry32) (uintptr, error) {
+
+	result, _, err := thread32First.Call(snapshot, (uintptr)(unsafe.Pointer(threadEntry)))
+	return result, err
+}
+
+func Thread32Next(snapshot uintptr, threadEntry *windows.ThreadEntry32) (uintptr, error) {
+
+	result, _, err := thread32Next.Call(snapshot, (uintptr)(unsafe.Pointer(threadEntry)))
+	return result, err
+}
+
+func OpenThread(desiredAccess uint32, inheritHandle uint32, threadId uint32) (uintptr, error) {
+
+	tHandle, _, err := openThread.Call(uintptr(desiredAccess), uintptr(inheritHandle), uintptr(threadId))
+	return tHandle, err
+}
+
+func QueueUserAPC(pfnAPC *uintptr, tHandle uintptr) uint32 {
+	result, _, _ := queueUserAPC.Call((uintptr)(unsafe.Pointer(&pfnAPC)), tHandle, 0)
+	return uint32(result)
 }
