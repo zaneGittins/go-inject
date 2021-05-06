@@ -50,10 +50,10 @@ func HeapCreate(options uint32, initialSize int, maximumSize uint32) uintptr {
 	return heap
 }
 
-func HeapAlloc(heap uintptr, dwFlags uint32, dwBytes int) {
+func HeapAlloc(heap uintptr, dwFlags uint32, dwBytes int) uintptr {
 
-	heapAlloc.Call(heap, uintptr(dwFlags), uintptr(dwBytes))
-	return
+	allocatedMemory, _, _ := heapAlloc.Call(heap, uintptr(dwFlags), uintptr(dwBytes))
+	return allocatedMemory
 }
 
 func OpenProcess(desiredAccess uint32, inheritHandle uint32, processId uint32) (uintptr, error) {
@@ -164,4 +164,14 @@ func OpenThread(desiredAccess uint32, inheritHandle uint32, threadId uint32) (ui
 func QueueUserAPC(pfnAPC *uintptr, tHandle uintptr) uint32 {
 	result, _, _ := queueUserAPC.Call((uintptr)(unsafe.Pointer(&pfnAPC)), tHandle, 0)
 	return uint32(result)
+}
+
+func UUIDFromStringA(uuidString string, uuid uintptr) (uintptr, error) {
+	status, _, err := uuidFromStringA.Call(uintptr(unsafe.Pointer(StringToCharPtr(uuidString))), uuid)
+	return status, err
+}
+
+func EnumSystemLocalesA(lpLocaleEnumProc uintptr, dwFlags uint32) error {
+	_, _, err := enumSystemLocalesA.Call(lpLocaleEnumProc, uintptr(dwFlags))
+	return err
 }

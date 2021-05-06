@@ -8,6 +8,7 @@ var (
 	ntdll    = windows.NewLazySystemDLL("ntdll.dll")
 	kernel32 = windows.NewLazySystemDLL("kernel32.dll")
 	psapi    = windows.NewLazySystemDLL("psapi.dll")
+	rpcrt4   = windows.NewLazySystemDLL("Rpcrt4.dll")
 
 	// NTDLL
 	rtlCopyMemory = ntdll.NewProc("RtlCopyMemory")
@@ -35,7 +36,11 @@ var (
 	thread32Next             = kernel32.NewProc("Thread32Next")
 	openThread               = kernel32.NewProc("OpenThread")
 	queueUserAPC             = kernel32.NewProc("QueueUserAPC")
+	enumSystemLocalesA       = kernel32.NewProc("EnumSystemLocalesA")
 
 	// PSAPI
 	enumProcesses = psapi.NewProc("EnumProcesses")
+
+	// rpcrt4
+	uuidFromStringA = rpcrt4.NewProc("UuidFromStringA")
 )
