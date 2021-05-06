@@ -36,17 +36,11 @@ set LPORT 4444
 to_handler
 ```
 
-## Build
+## Build Examples
 
 Linux:
 ```bash
-env GOOS=windows GOARCH=amd64 go build
-```
-
-Windows:
-```bash
-$env:GOOS="windows"
-go build example.go
+env GOOS=windows go build -ldflags="-s -w" -trimpath examples/x64/uuid/uuid.go
 ```
 
 ## References
