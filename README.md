@@ -1,15 +1,21 @@
 # go-inject
 
-Process injection techniques written in Go.
+Process injection techniques written in Go. I've also expanded this repo to include some general offense techniques in Go.
 
 ## Examples
 
+Process Injection
+
 * [Classic virtual alloc](examples/x64/valloc/valloc.go)
-* [Hook detection](examples/x64/detect-hooks/detect-hooks.go)
 * [Heap](examples/x64/heap/heap.go)
 * [Remote Thread Injection](examples/x64/remote-thread/remote_thread.go)
 * [APC Queue Code Injection](examples/x64/queue-user-apc/queue.go)
 * [UUID Injection - Used by Lazarus 2021](examples/x64/uuid/uuid.go)
+
+Other offensive techniques:
+
+* [Hook detection](examples/x64/detect-hooks/detect-hooks.go)
+* [Keylogger](examples/x64/keylog/keylog.go)
 
 ## Usage
 

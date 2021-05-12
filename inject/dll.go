@@ -9,6 +9,7 @@ var (
 	kernel32 = windows.NewLazySystemDLL("kernel32.dll")
 	psapi    = windows.NewLazySystemDLL("psapi.dll")
 	rpcrt4   = windows.NewLazySystemDLL("Rpcrt4.dll")
+	user32   = windows.NewLazySystemDLL("User32.dll")
 
 	// NTDLL
 	rtlCopyMemory = ntdll.NewProc("RtlCopyMemory")
@@ -37,10 +38,21 @@ var (
 	openThread               = kernel32.NewProc("OpenThread")
 	queueUserAPC             = kernel32.NewProc("QueueUserAPC")
 	enumSystemLocalesA       = kernel32.NewProc("EnumSystemLocalesA")
+	getCurrentThreadId       = kernel32.NewProc("GetCurrentThreadId")
+	setConsoleCtrlHandler    = kernel32.NewProc("SetConsoleCtrlHandler")
 
 	// PSAPI
 	enumProcesses = psapi.NewProc("EnumProcesses")
 
 	// rpcrt4
 	uuidFromStringA = rpcrt4.NewProc("UuidFromStringA")
+
+	// user32
+	setWindowsHookExA   = user32.NewProc("SetWindowsHookExA")
+	getMessageW         = user32.NewProc("GetMessageW")
+	translateMessage    = user32.NewProc("TranslateMessage")
+	dispatchMessage     = user32.NewProc("DispatchMessage")
+	unhookWindowsHookEx = user32.NewProc("UnhookWindowsHookEx")
+	postThreadMessage   = user32.NewProc("PostThreadMessage")
+	callNextHookEx      = user32.NewProc("CallNextHookEx")
 )

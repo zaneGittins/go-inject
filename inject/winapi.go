@@ -1,6 +1,7 @@
 package inject
 
 import (
+	"syscall"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -13,6 +14,10 @@ var (
 	ERROR_NO_MORE_FILES string = "There are no more files."
 	SUCCESS             string = "The operation completed successfully."
 )
+
+type HOOKPROC func(int, uintptr, uintptr) uintptr
+
+type HANDLER func() uintptr
 
 func RtlCopyMemory(destination uintptr, source []byte) {
 
@@ -174,4 +179,56 @@ func UUIDFromStringA(uuidString string, uuid uintptr) (uintptr, error) {
 func EnumSystemLocalesA(lpLocaleEnumProc uintptr, dwFlags uint32) error {
 	_, _, err := enumSystemLocalesA.Call(lpLocaleEnumProc, uintptr(dwFlags))
 	return err
+}
+
+func GetCurrentThreadId() (uint32, error) {
+	result, _, err := getCurrentThreadId.Call()
+	return uint32(result), err
+}
+
+func SetConsoleCtrlHandler(handlerRoutine HANDLER, add uint32) error {
+
+	_, _, err := setConsoleCtrlHandler.Call(uintptr(syscall.NewCallback(handlerRoutine)), uintptr(add))
+	return err
+}
+
+func SetWindowsHookEx(idHook uint32, lpfn HOOKPROC, hmod uintptr, dwThreadID uint32) uintptr {
+
+	result, _, _ := setWindowsHookExA.Call(
+		uintptr(idHook),
+		uintptr(syscall.NewCallback(lpfn)),
+		uintptr(hmod),
+		uintptr(dwThreadID),
+	)
+	return result
+}
+
+func GetMessage(lpMsg uintptr, hWnd uintptr, wMsgFilterMin uint32, wMsgFilterMax uint32) (uint32, error) {
+	result, _, err := getMessageW.Call(lpMsg, hWnd, uintptr(wMsgFilterMin), uintptr(wMsgFilterMax))
+	return uint32(result), err
+}
+
+func TranslateMessage(lpMsg uintptr) error {
+	_, _, err := translateMessage.Call(lpMsg)
+	return err
+}
+
+func DispatchMessage(lpMsg uintptr) error {
+	_, _, err := dispatchMessage.Call(lpMsg)
+	return err
+}
+
+func UnhookWindowsHookEx(hhk uintptr) error {
+	_, _, err := unhookWindowsHookEx.Call(hhk)
+	return err
+}
+
+func PostThreadMessage(idThread uint32, msg uint32, wparam uintptr, lparam uintptr) (uint32, error) {
+	result, _, err := postThreadMessage.Call(uintptr(idThread), uintptr(msg), wparam, lparam)
+	return uint32(result), err
+}
+
+func CallNextHookEx(hhook uintptr, nCode uint32, wparam uintptr, lparam uintptr) uintptr {
+	result, _, _ := callNextHookEx.Call(hhook, uintptr(nCode), wparam, lparam)
+	return result
 }
