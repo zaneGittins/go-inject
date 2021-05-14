@@ -1,7 +1,6 @@
 package inject
 
 import (
-	"encoding/binary"
 	"syscall"
 	"unsafe"
 
@@ -191,12 +190,9 @@ func CreateProcessA(appName string,
 }
 
 // https://github.com/abdullah2993/go-runpe/blob/403894fc2c3152c1f8ac98221250f1d46fd70bff/runpe.go#L288
-func GetThreadContext(hThread uintptr) ([]uint8, error) {
-	ctx := make([]uint8, 1232)
-	binary.LittleEndian.PutUint32(ctx[48:], 0x00100000|0x00000002)
-	ctxPtr := unsafe.Pointer(&ctx[0])
-	_, _, err := getThreadContext.Call(hThread, uintptr(ctxPtr))
-	return ctx, err
+func GetThreadContext(hThread uintptr, ctx *CONTEXT) error {
+	_, _, err := getThreadContext.Call(hThread, (uintptr)(unsafe.Pointer(ctx)))
+	return err
 }
 
 func ReadProcessMemory(process uintptr, baseAddress uintptr, buffer []byte, size uint32) (uint32, error) {
@@ -206,9 +202,8 @@ func ReadProcessMemory(process uintptr, baseAddress uintptr, buffer []byte, size
 	return nbytes, err
 }
 
-func SetThreadContext(hThread uintptr, ctx []uint8) error {
-	ctxPtr := unsafe.Pointer(&ctx[0])
-	_, _, err := setThreadContext.Call(hThread, uintptr(ctxPtr))
+func SetThreadContext(hThread uintptr, ctx CONTEXT) error {
+	_, _, err := setThreadContext.Call(hThread, uintptr(unsafe.Pointer(&ctx)))
 	return err
 }
 
