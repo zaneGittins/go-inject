@@ -61,3 +61,4 @@ env GOOS=windows go build -ldflags="-s -w" -trimpath examples/x64/uuid/uuid.go
 * https://posts.specterops.io/adventures-in-dynamic-evasion-1fe0bac57aa
 * https://research.nccgroup.com/2021/01/23/rift-analysing-a-lazarus-shellcode-execution-method/
 * https://www.ired.team/offensive-security/code-injection-process-injection/apc-queue-code-injection
+* https://github.com/abdullah2993/go-runpe

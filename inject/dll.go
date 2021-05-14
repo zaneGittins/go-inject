@@ -12,8 +12,9 @@ var (
 	user32   = windows.NewLazySystemDLL("User32.dll")
 
 	// NTDLL
-	rtlCopyMemory = ntdll.NewProc("RtlCopyMemory")
-	rtlMoveMemory = ntdll.NewProc("RtlMoveMemory")
+	rtlCopyMemory        = ntdll.NewProc("RtlCopyMemory")
+	rtlMoveMemory        = ntdll.NewProc("RtlMoveMemory")
+	ntUnmapViewOfSection = ntdll.NewProc("NtUnmapViewOfSection")
 
 	// KERNEL32
 	createThread             = kernel32.NewProc("CreateThread")
@@ -40,6 +41,11 @@ var (
 	enumSystemLocalesA       = kernel32.NewProc("EnumSystemLocalesA")
 	getCurrentThreadId       = kernel32.NewProc("GetCurrentThreadId")
 	setConsoleCtrlHandler    = kernel32.NewProc("SetConsoleCtrlHandler")
+	createProcessA           = kernel32.NewProc("CreateProcessA")
+	getThreadContext         = kernel32.NewProc("GetThreadContext")
+	readProcessMemory        = kernel32.NewProc("ReadProcessMemory")
+	setThreadContext         = kernel32.NewProc("SetThreadContext")
+	resumeThread             = kernel32.NewProc("ResumeThread")
 
 	// PSAPI
 	enumProcesses = psapi.NewProc("EnumProcesses")
