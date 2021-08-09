@@ -1,6 +1,9 @@
 package inject
 
-import "syscall"
+import (
+	"syscall"	"unsafe"
+)
+
 
 func SetWindowsHookEx(idHook uint32, lpfn HOOKPROC, hmod uintptr, dwThreadID uint32) uintptr {
 
@@ -41,4 +44,17 @@ func PostThreadMessage(idThread uint32, msg uint32, wparam uintptr, lparam uintp
 func CallNextHookEx(hhook uintptr, nCode uint32, wparam uintptr, lparam uintptr) uintptr {
 	result, _, _ := callNextHookEx.Call(hhook, uintptr(nCode), wparam, lparam)
 	return result
+}
+
+func FindWindowA(lpClassName string) (uintptr, error) {
+
+	result, _, err := findWindowA.Call(uintptr(unsafe.Pointer(StringToCharPtr(lpClassName))), uintptr(0))
+	return result, err
+}
+
+func GetWindowThreadProcessId(hwnd uintptr) (uint32, error) {
+
+	var processID uint32
+	_, _, err := getWindowThreadProcessId.Call(hwnd, (uintptr)(unsafe.Pointer(&processID)))
+	return processID, err
 }
