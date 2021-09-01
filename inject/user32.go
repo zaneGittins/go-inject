@@ -1,7 +1,8 @@
 package inject
 
 import (
-	"syscall"	"unsafe"
+	"syscall"
+	"unsafe"
 )
 
 
