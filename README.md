@@ -17,6 +17,7 @@ Other offensive techniques:
 * [Hook detection](examples/x64/detect-hooks/detect-hooks.go)
 * [Keylogger](examples/x64/keylog/keylog.go)
 * [Hollow](examples/x64/hollow/hollow.go)
+* [API Hashing](examples/x64/api_hash/api_hash.go)
 
 ## Usage
 
