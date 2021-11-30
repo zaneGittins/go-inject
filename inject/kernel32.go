@@ -211,3 +211,8 @@ func ResumeThread(hThread uintptr) error {
 	_, _, err := resumeThread.Call(hThread)
 	return err
 }
+
+func LoadLibraryA(LibFileName string) (uintptr, error) {
+	handle, _, err := loadLibraryA.Call(uintptr(unsafe.Pointer(StringToCharPtr(LibFileName))))
+	return handle, err
+}
