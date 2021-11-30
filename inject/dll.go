@@ -46,6 +46,7 @@ var (
 	readProcessMemory        = kernel32.NewProc("ReadProcessMemory")
 	setThreadContext         = kernel32.NewProc("SetThreadContext")
 	resumeThread             = kernel32.NewProc("ResumeThread")
+	loadLibraryA             = kernel32.NewProc("LoadLibraryA")
 
 	// PSAPI
 	enumProcesses = psapi.NewProc("EnumProcesses")
