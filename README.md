@@ -51,6 +51,10 @@ Linux:
 env GOOS=windows go build -ldflags="-s -w" -trimpath examples/x64/uuid/uuid.go
 ```
 
+## Detection
+
+[Yara ruleset](yara/goinject.yar)
+
 ## References
 
 * https://blog.sunggwanchoi.com/eng-uuid-shellcode-execution/
