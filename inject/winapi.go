@@ -7,6 +7,8 @@ var (
 	ERROR_NO_MORE_FILES string = "There are no more files."
 	SUCCESS             string = "The operation completed successfully."
 	CONTEXT_FULL        uint32 = 0x400003
+	CONTEXT_SEGMENTS    uint32 = 0x04
+	CONTEXt_ALL         uint32 = 0xffffff
 )
 
 type HOOKPROC func(int, uintptr, uintptr) uintptr
@@ -105,4 +107,78 @@ type CONTEXT struct {
 	LastBranchFromRip    uint64
 	LastExceptionToRip   uint64
 	LastExceptionFromRip uint64
+}
+
+type WOW64_CONTEXT struct {
+	ContextFlags      uint32
+	Dr0               uint32
+	Dr1               uint32
+	Dr2               uint32
+	Dr3               uint32
+	Dr6               uint32
+	Dr7               uint32
+	FloatSave         WOW64_FLOATING_SAVE_AREA
+	SegGs             uint32
+	SegFs             uint32
+	SegEs             uint32
+	SegDs             uint32
+	Edi               uint32
+	Esi               uint32
+	Ebx               uint32
+	Edx               uint32
+	Ecx               uint32
+	Eax               uint32
+	Ebp               uint32
+	Eip               uint32
+	SegCs             uint32
+	EFlags            uint32
+	Esp               uint32
+	SegSs             uint32
+	ExtendedRegisters [512]byte
+}
+
+type WOW64_FLOATING_SAVE_AREA struct {
+	ControlWord   uint32
+	StatusWord    uint32
+	TagWord       uint32
+	ErrorOffset   uint32
+	ErrorSelector uint32
+	DataOffset    uint32
+	DataSelector  uint32
+	RegisterArea  [80]byte
+	Cr0NpxState   uint32
+}
+
+type LDT_ENTRY struct {
+	LimitLow uint16
+	BaseLow  uint16
+	HighWord struct {
+		Bytes struct {
+			BaseMid byte
+			Flags1  byte
+			Flags2  byte
+			BaseHi  byte
+		}
+		Bits struct {
+			BaseMid     uint32
+			Type        uint32
+			Dpl         uint32
+			Pres        uint32
+			LimitHi     uint32
+			Sys         uint32
+			Reserved0   uint32
+			DefaultBig  uint32
+			Granularity uint32
+			BaseHi      uint32
+		}
+	}
+}
+
+type PROCESS_BASIC_INFORMATION struct {
+	Reserved1       uint64
+	PebBaseAddress  uint64
+	Reserved2       uint64
+	Reserved3       uint64
+	UniqueProcessId uint64
+	Reserved4       uint64
 }

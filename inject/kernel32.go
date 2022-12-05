@@ -1,6 +1,7 @@
 package inject
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 
@@ -189,8 +190,12 @@ func CreateProcessA(appName string,
 	return uint32(result), SI, PI, err
 }
 
-// https://github.com/abdullah2993/go-runpe/blob/403894fc2c3152c1f8ac98221250f1d46fd70bff/runpe.go#L288
 func GetThreadContext(hThread uintptr, ctx *CONTEXT) error {
+	_, _, err := getThreadContext.Call(hThread, (uintptr)(unsafe.Pointer(ctx)))
+	return err
+}
+
+func GetThreadContext32(hThread uintptr, ctx *WOW64_CONTEXT) error {
 	_, _, err := getThreadContext.Call(hThread, (uintptr)(unsafe.Pointer(ctx)))
 	return err
 }
@@ -215,4 +220,32 @@ func ResumeThread(hThread uintptr) error {
 func LoadLibraryA(LibFileName string) (uintptr, error) {
 	handle, _, err := loadLibraryA.Call(uintptr(unsafe.Pointer(StringToCharPtr(LibFileName))))
 	return handle, err
+}
+
+func GetThreadSelectorEntry(hThread uintptr, dwSelector uint32) (*LDT_ENTRY, error) {
+
+	// lpSelectorEntry := new(LDT_ENTRY)
+
+	var lpSelectorEntry LDT_ENTRY
+	fmt.Println(hThread)
+
+	res, _, err := getThreadSelectorEntry.Call(hThread, uintptr(dwSelector), uintptr(unsafe.Pointer(&lpSelectorEntry)))
+
+	fmt.Println(lpSelectorEntry)
+	fmt.Println(res)
+	return &lpSelectorEntry, err
+}
+
+func Wow64GetThreadSelectorEntry(hThread uintptr, dwSelector uint32) (*LDT_ENTRY, error) {
+
+	// lpSelectorEntry := new(LDT_ENTRY)
+
+	var lpSelectorEntry LDT_ENTRY
+	fmt.Println(hThread)
+
+	res, _, err := wow64GetThreadSelectorEntry.Call(hThread, uintptr(dwSelector), uintptr(unsafe.Pointer(&lpSelectorEntry)))
+
+	fmt.Println(lpSelectorEntry)
+	fmt.Println(res)
+	return &lpSelectorEntry, err
 }

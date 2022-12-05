@@ -18,6 +18,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+// Hashes calculated from function getFunctionAddressbyHash()
 var (
 	VirtualAllocHash        = 0x97bc257
 	RtlCopyMemoryHash       = 0xd232bb4b
@@ -79,15 +80,12 @@ type ImageExportDirectory struct {
 	AddressOfNameOrdinals uint32
 }
 
-func getHashFromString(function string) int {
+func getHashFromString(input string) int {
 
 	hash := 0x1505
-
-	// function = strings.ToUpper(function)
-
-	for i := 0; i < len(function); i++ {
+	for i := 0; i < len(input); i++ {
 		hash = (hash * 0x21) & 0xFFFFFFFF
-		hash = (hash + (int(function[i]) & 0xFFFFFFDF)) & 0xFFFFFFFF
+		hash = (hash + (int(input[i]) & 0xFFFFFFDF)) & 0xFFFFFFFF
 	}
 
 	return hash
@@ -101,52 +99,29 @@ func getFunctionAddressbyHash(library string, hash int) uintptr {
 		fmt.Printf("%s\n", err)
 	}
 
-	// 	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)libraryBase;
 	dosHeader := (*ImageDosHeader)(unsafe.Pointer(&(*[64]byte)(unsafe.Pointer(libraryBase))[:][0]))
-	// fmt.Printf("DOS Header EMagic: %x\n", dosHeader.EMagic) // 5a4d
 
-	// PIMAGE_NT_HEADERS imageNTHeaders = (PIMAGE_NT_HEADERS)((DWORD_PTR)libraryBase + dosHeader->e_lfanew);
 	offset := (libraryBase) + uintptr(dosHeader.ELfanew)
 	imageNTHeaders := (*ImageNTHeaders)(unsafe.Pointer(&(*[264]byte)(unsafe.Pointer(offset))[:][0]))
-	// fmt.Printf("NT Header Signature: %x\n", imageNTHeaders.Signature) // 4450
 
-	// DWORD_PTR exportDirectoryRVA = imageNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
 	exportDirectoryRVA := imageNTHeaders.OptionalHeader.DataDirectory[pe.IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
-	// fmt.Printf("Export Directory RVA: %x\n", exportDirectoryRVA) // 99070
 
-	// 	PIMAGE_EXPORT_DIRECTORY imageExportDirectory = (PIMAGE_EXPORT_DIRECTORY)((DWORD_PTR)libraryBase + exportDirectoryRVA);
 	offset = (libraryBase) + uintptr(exportDirectoryRVA)
 	imageExportDirectory := (*ImageExportDirectory)(unsafe.Pointer(&(*[256]byte)(unsafe.Pointer(offset))[:][0]))
-	// fmt.Printf("Export Directory Name: %x\n", imageExportDirectory.Name)                                 // 9d062
-	// fmt.Printf("imageExportDirectory.AddressOfFunctions: %x\n", imageExportDirectory.AddressOfFunctions) // 9d062
 
-	// PDWORD addresOfFunctionsRVA = (PDWORD)((DWORD_PTR)libraryBase + imageExportDirectory->AddressOfFunctions);
 	offset = (libraryBase) + uintptr(imageExportDirectory.AddressOfFunctions)
 	addresOfFunctionsRVA := (*uint)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(offset))[:][0]))
-	// fmt.Printf("addresOfFunctionsRVA: %x\n", *&addresOfFunctionsRVA) // 17a99098 - 7ff917a99098
 
-	// 	DWORD addressOfNamesRVA = (PDWORD)((DWORD_PTR)libraryBase + imageExportDirectory->AddressOfNames);
 	offset = (libraryBase) + uintptr(imageExportDirectory.AddressOfNames)
 	addressOfNamesRVA := (*uint32)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(offset))[:][0]))
-	// fmt.Printf("addressOfNamesRVA: %x\n", addressOfNamesRVA)
 
-	// addressOfNameOrdinalsRVA = (PWORD)((DWORD_PTR)libraryBase + imageExportDirectory->AddressOfNameOrdinals);
-	// offset = (libraryBase) + uintptr(imageExportDirectory.AddressOfNameOrdinals)
-	// addressOfNameOrdinalsRVA := (*uint32)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(offset))[:][0]))
-	// fmt.Printf("addressOfNameOrdinalsRVA: %x\n", addressOfNameOrdinalsRVA)
-	// fmt.Printf("NumberOfFunctions %d\n", imageExportDirectory.NumberOfFunctions)
-
-	// for (i i = 0; i < imageExportDirectory->NumberOfFunctions; i++)
 	for i := (0); i < int(imageExportDirectory.NumberOfFunctions); i += 1 {
 
-		// DWORD functionNameRVA = addressOfNamesRVA[i];
 		offset = (libraryBase) + uintptr(imageExportDirectory.AddressOfNames) + uintptr(i*4)
 		addressOfNamesRVA = (*uint32)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(offset))[:][0]))
-		functionNameRVA := (*uint32)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(addressOfNamesRVA))[:][0])) // 9d06f
-
-		// DWORD_PTR functionNameVA = (DWORD_PTR)libraryBase + functionNameRVA;
+		functionNameRVA := (*uint32)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(addressOfNamesRVA))[:][0]))
 		offset = (libraryBase) + uintptr(*functionNameRVA)
-		functionNameVA := (uintptr)(unsafe.Pointer(&(*[32]byte)(unsafe.Pointer(offset))[:][0])) // 9d06f
+		functionNameVA := (uintptr)(unsafe.Pointer(&(*[32]byte)(unsafe.Pointer(offset))[:][0]))
 
 		// Read until null byte, strings should be null terminated.
 		functionName := ""
@@ -164,19 +139,13 @@ func getFunctionAddressbyHash(library string, hash int) uintptr {
 			// addressOfNameOrdinalsRVA[i]
 			offset = (libraryBase) + uintptr(imageExportDirectory.AddressOfNameOrdinals) + uintptr(i*2) // We multiply by 2 because each element is 2 bytes in the array.
 			ordinalRVA := (*uint16)(unsafe.Pointer(&(*[2]byte)(unsafe.Pointer(offset))[:][0]))
-			//fmt.Printf("addressOfNameOrdinalsRVA: %x\n", *ordinalRVA) // 0xf5
 
-			// functionAddressRVA = addresOfFunctionsRVA[addressOfNameOrdinalsRVA[i]];
 			offset = uintptr(unsafe.Pointer(*&addresOfFunctionsRVA)) + uintptr(uint32(*ordinalRVA)*4) // We multiply by 4 because each element is 4 bytes in the array.
 			functionAddressRVA := (*uint32)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(offset))[:][0]))
-			//fmt.Printf("functionAddressRVA: %x\n", *functionAddressRVA) // 0x1b5a0
 
-			//functionAddress = (PDWORD)((DWORD_PTR)libraryBase + functionAddressRVA);
 			offset = (libraryBase) + uintptr(*functionAddressRVA) // 0x1b5a0
 			functionAddress := (uintptr)(unsafe.Pointer(&(*[4]byte)(unsafe.Pointer(offset))[:][0]))
 
-			// fmt.Printf("%s : 0x%x : %x\n", functionName, functionNameHash, functionAddress) // CreateThread : 0x544e304 : 7ff917a9e9d6
-			// CreateThread : 0x544e304 : 17a1b5a0
 			return functionAddress
 		}
 	}
