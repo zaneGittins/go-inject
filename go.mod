@@ -1,4 +1,4 @@
-module go-inject
+module github.com/zaneGittins/go-inject
 
 go 1.13
 

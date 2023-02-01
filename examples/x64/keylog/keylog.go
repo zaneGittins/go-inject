@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"go-inject/inject"
 	"strings"
 	"unsafe"
+
+	"github.com/zaneGittins/go-inject/inject"
 )
 
 type KBDLLHOOKSTRUCT struct {

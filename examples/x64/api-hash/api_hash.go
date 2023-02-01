@@ -10,10 +10,11 @@ import (
 	"debug/pe"
 	"encoding/hex"
 	"fmt"
-	"go-inject/inject"
 	"os"
 	"syscall"
 	"unsafe"
+
+	"github.com/zaneGittins/go-inject/inject"
 
 	"golang.org/x/sys/windows"
 )

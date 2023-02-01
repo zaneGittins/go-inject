@@ -4,10 +4,11 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
-	"go-inject/inject"
 	"os"
 	"time"
 	"unsafe"
+
+	"github.com/zaneGittins/go-inject/inject"
 
 	"golang.org/x/sys/windows"
 )

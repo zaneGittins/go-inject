@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go-inject/inject"
 	"io/ioutil"
+
+	"github.com/zaneGittins/go-inject/inject"
 )
 
 func main() {

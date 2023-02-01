@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"go-inject/inject"
+
+	"github.com/zaneGittins/go-inject/inject"
 )
 
 func main() {

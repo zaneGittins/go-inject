@@ -9,8 +9,9 @@ package main
 
 import (
 	"fmt"
-	"go-inject/inject"
 	"time"
+
+	"github.com/zaneGittins/go-inject/inject"
 )
 
 func main() {

@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"go-inject/inject"
 	"os"
+
+	"github.com/zaneGittins/go-inject/inject"
 )
 
 func main() {
