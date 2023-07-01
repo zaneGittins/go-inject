@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zaneGittins/go-inject"
+	"github.com/zaneGittins/go-inject/inject"
 )
 
 func main() {

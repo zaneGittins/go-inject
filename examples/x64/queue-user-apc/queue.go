@@ -33,7 +33,7 @@ func main() {
 	var processEntry windows.ProcessEntry32
 	processEntry.Size = uint32(unsafe.Sizeof(processEntry))
 	_, err = inject.Process32Next(snapshot, &processEntry)
-	if err != nil && err.Error() != inject.SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -42,13 +42,13 @@ func main() {
 			break
 		}
 		_, err = inject.Process32Next(snapshot, &processEntry)
-		if err.Error() == inject.ERROR_NO_MORE_FILES {
+		if err == windows.Errno(18) {
 			break
 		}
 	}
 
 	processHandle, err := inject.OpenProcess(windows.PROCESS_CREATE_THREAD|windows.PROCESS_VM_OPERATION|windows.PROCESS_VM_WRITE|windows.PROCESS_VM_READ|windows.PROCESS_QUERY_INFORMATION, 0, uint32(*tPid))
-	if err != nil && err.Error() != inject.SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -59,7 +59,7 @@ func main() {
 	var threadEntry windows.ThreadEntry32
 	threadEntry.Size = uint32(unsafe.Sizeof(threadEntry))
 	_, err = inject.Thread32First(snapshot, &threadEntry)
-	if err != nil && err.Error() != inject.SUCCESS {
+	if err != nil && err != windows.Errno(0) {
 		fmt.Println(err)
 	}
 
@@ -73,7 +73,7 @@ func main() {
 		}
 		threadEntry.Size = uint32(unsafe.Sizeof(threadEntry))
 		_, err = inject.Thread32Next(snapshot, &threadEntry)
-		if err.Error() == inject.ERROR_NO_MORE_FILES {
+		if err == windows.Errno(18) {
 			break
 		}
 	}
@@ -82,7 +82,7 @@ func main() {
 		if thread.ThreadID > 0 {
 			fmt.Printf("PID: %d, TID: %d\n", thread.OwnerProcessID, thread.ThreadID)
 			tHandle, err := inject.OpenThread(inject.THREAD_ALL_ACCESS, 1, thread.ThreadID)
-			if err != nil && err.Error() != inject.SUCCESS {
+			if err != nil && err != windows.Errno(0) {
 				fmt.Println(err)
 			}
 			inject.QueueUserAPC(&memptr, tHandle)

@@ -1,14 +1,12 @@
 package inject
 
 var (
-	TH32CS_SNAPPROCESS  uint32 = 0x00000002
-	TH32CS_SNAPTHREAD   uint32 = 0x00000004
-	THREAD_ALL_ACCESS   uint32 = 0xffff
-	ERROR_NO_MORE_FILES string = "There are no more files."
-	SUCCESS             string = "The operation completed successfully."
-	CONTEXT_FULL        uint32 = 0x400003
-	CONTEXT_SEGMENTS    uint32 = 0x04
-	CONTEXt_ALL         uint32 = 0xffffff
+	TH32CS_SNAPPROCESS uint32 = 0x00000002
+	TH32CS_SNAPTHREAD  uint32 = 0x00000004
+	THREAD_ALL_ACCESS  uint32 = 0xffff
+	CONTEXT_FULL       uint32 = 0x400003
+	CONTEXT_SEGMENTS   uint32 = 0x04
+	CONTEXt_ALL        uint32 = 0xffffff
 )
 
 type HOOKPROC func(int, uintptr, uintptr) uintptr

